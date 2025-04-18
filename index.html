@@ -11,6 +11,9 @@
     <style>html { scroll-behavior: smooth; }</style>
   </head>
   <body>
+    <!-- Cursor follower element -->
+    <div id="cursor-follower"></div>
+    
     <header class="d-flex justify-content-between align-items-center px-4 py-3 fixed-top">
       <a href="#" class="fs-4 fw-bold text-decoration-none">Kameron</a>
       <nav class="nav">
@@ -305,29 +308,9 @@
     <script src="theme-toggle.js"></script>
     <script src="back-to-top.js"></script>
     <script>
-      // Enhanced scroll animations
-      const sections = document.querySelectorAll('section');
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, observerOptions);
-
-      sections.forEach(section => {
-        section.classList.add('fade-in');
-        observer.observe(section);
-      });
-
       // Header scroll effect
-      const header = document.querySelector('header');
-      window.addEventListener('scroll', () => {
+      window.addEventListener('scroll', function() {
+        const header = document.querySelector('header');
         if (window.scrollY > 50) {
           header.classList.add('scrolled');
         } else {
@@ -335,30 +318,130 @@
         }
       });
 
-      // Back to top button
-      const backToTop = document.getElementById('back-to-top');
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-          backToTop.classList.add('visible');
-        } else {
-          backToTop.classList.remove('visible');
-        }
-      });
-
-      // Mobile menu
+      // Mobile menu toggle
       const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-      const navLinks = document.querySelector('.nav-links');
-      
-      mobileMenuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
+      const mobileMenu = document.querySelector('.mobile-menu');
+      const closeBtn = document.querySelector('.close-btn');
+
+      mobileMenuBtn.addEventListener('click', function() {
+        mobileMenu.classList.add('active');
       });
 
-      // Close mobile menu when clicking outside
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav-links') && !e.target.closest('.mobile-menu-btn')) {
-          navLinks.classList.remove('active');
+      closeBtn.addEventListener('click', function() {
+        mobileMenu.classList.remove('active');
+      });
+
+      // Close mobile menu when clicking on a link
+      const mobileLinks = document.querySelectorAll('.mobile-menu .nav-link');
+      mobileLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          mobileMenu.classList.remove('active');
+        });
+      });
+      
+      // Cursor follower effect
+      const cursorFollower = document.getElementById('cursor-follower');
+      let mouseX = 0;
+      let mouseY = 0;
+      let followerX = 0;
+      let followerY = 0;
+      
+      document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+      
+      function animateCursor() {
+        // Faster following effect (increased from 0.1 to 0.25)
+        followerX += (mouseX - followerX) * 0.25;
+        followerY += (mouseY - followerY) * 0.25;
+        
+        cursorFollower.style.left = followerX + 'px';
+        cursorFollower.style.top = followerY + 'px';
+        
+        requestAnimationFrame(animateCursor);
+      }
+      
+      animateCursor();
+      
+      // Add hover effect to interactive elements
+      const interactiveElements = document.querySelectorAll('a, button, .card, .skill-badge');
+      
+      interactiveElements.forEach(element => {
+        element.addEventListener('mouseenter', function() {
+          cursorFollower.classList.add('hover');
+        });
+        
+        element.addEventListener('mouseleave', function() {
+          cursorFollower.classList.remove('hover');
+        });
+      });
+
+      // Timeline cards animation
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.timeline-card').forEach(card => {
+        observer.observe(card);
+      });
+
+      // Active section highlighting in navigation
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('header .nav-link');
+      const mobileNavLinks = document.querySelectorAll('.mobile-menu .nav-link');
+      
+      function highlightNavOnScroll() {
+        let currentSection = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 150;
+          const sectionHeight = section.offsetHeight;
+          
+          if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+            currentSection = section.getAttribute('id');
+            console.log('Current section:', currentSection); // Debug log
+          }
+        });
+        
+        // Update main navigation
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          const href = link.getAttribute('href');
+          if (href && href.startsWith('#') && href.substring(1) === currentSection) {
+            link.classList.add('active');
+            console.log('Activating link:', href); // Debug log
+          }
+        });
+        
+        // Update mobile navigation
+        mobileNavLinks.forEach(link => {
+          link.classList.remove('active');
+          const href = link.getAttribute('href');
+          if (href && href.startsWith('#') && href.substring(1) === currentSection) {
+            link.classList.add('active');
+          }
+        });
+      }
+      
+      // Use throttling to improve performance
+      let isScrolling = false;
+      window.addEventListener('scroll', function() {
+        if (!isScrolling) {
+          window.requestAnimationFrame(function() {
+            highlightNavOnScroll();
+            isScrolling = false;
+          });
+          isScrolling = true;
         }
       });
+      
+      // Run once on page load to highlight the initial section
+      highlightNavOnScroll();
     </script>
   </body>
 </html>

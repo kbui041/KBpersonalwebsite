@@ -42,12 +42,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const timelineItems = document.querySelectorAll('.timeline-item');
     timelineItems.forEach(item => {
       item.addEventListener('mouseenter', function() {
-        // Add a class to the item instead of trying to select the pseudo-element
-        this.classList.add('hover');
+        const dot = this.querySelector('::before');
+        if (dot) {
+          dot.style.transform = 'scale(1.5)';
+        }
       });
-      
+  
       item.addEventListener('mouseleave', function() {
-        this.classList.remove('hover');
+        const dot = this.querySelector('::before');
+        if (dot) {
+          dot.style.transform = 'scale(1)';
+        }
       });
     });
   }); 

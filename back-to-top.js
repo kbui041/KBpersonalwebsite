@@ -4,10 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('scroll', function() {
     if (window.scrollY > 300) {
       topBtn.classList.remove('d-none');
-      topBtn.classList.add('visible');
+      topBtn.classList.add('fade-in');
     } else {
       topBtn.classList.add('d-none');
-      topBtn.classList.remove('visible');
+      topBtn.classList.remove('fade-in');
     }
   });
   
